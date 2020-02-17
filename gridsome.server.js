@@ -34,9 +34,7 @@ async function getRemoteImage(node, collection, options) {
 
     await imageDownload(node[options.sourceField]).then(buffer => {
         
-        const crypto = require('crypto');
         for (let i = 0; i < 5; i++) {
-            const hash = crypto.createHash('sha256');
             hash.update(node[options.sourceField] + i);
             const type = imageType(buffer);
             var targetFileName = hash.digest('hex');
