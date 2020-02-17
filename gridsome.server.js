@@ -34,7 +34,7 @@ async function getRemoteImage(node, collection, options) {
 
     await imageDownload(node[options.sourceField]).then(buffer => {
         
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 1; i++) {
             hash.update(node[options.sourceField] + i);
             const type = imageType(buffer);
             var targetFileName = hash.digest('hex');
