@@ -34,16 +34,19 @@ async function getRemoteImage(node, collection, options) {
 
     await imageDownload(node[options.sourceField]).then(buffer => {
         
-        hash.update(node[options.sourceField]);
-        const type = imageType(buffer);
-        var targetFileName = hash.digest('hex');
-        const filePath = path.resolve('./', options.targetPath, `${targetFileName}.${type.ext}`)        
+        for (let i = 0; i < 1; i++) {
+            hash.update(node[options.sourceField] + i);
+            const type = imageType(buffer);
+            var targetFileName = hash.digest('hex');
+            const filePath = path.resolve('./', options.targetPath, `${targetFileName}.${type.ext}`)        
 
-        fs.writeFile(filePath, buffer, (err) => console.log(err ? err : ''));
+            fs.writeFile(filePath, buffer, (err) => console.log(err ? err : ''));
 
-        node[options.targetField] = filePath;
+            node[options.targetField] = filePath;
 
-        collection.updateNode(node);
+            collection.updateNode(node);
+        }
+        
     });
 
 }
