@@ -13,7 +13,7 @@ The plugin should work with any data source, but I have tested it only with `sou
 ## Install
 
 ```sh
-npm install -s https://github.com/noxify/gridome-plugin-image-download
+npm install -s https://github.com/noxify/gridsome-plugin-image-download.git
 ```
 
 ## Setup
