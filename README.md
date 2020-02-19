@@ -73,95 +73,158 @@ If you set `./src/assets/remoteImages`, it will save the images to `<projectroot
 
 # Example 
 
-## Markdown Files
 
-> /content/entries/entry1.md
+## Example 1 - Simple string field
 
-```md
----
-title: First Post
-remoteImage: https://images.unsplash.com/photo-1580451998921-c1e6e1ababe0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80
----
+<details>
+  <summary>Click here to see the example code</summary>
+  
+  > /content/entries/entry1.md
 
-Image Credits: https://unsplash.com/
-```
+  ```md
+  ---
+  title: First Post
+  remoteImage: https://images.unsplash.com/photo-1580451998921-c1e6e1ababe0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80
+  ---
 
-> /content/entries/entry2.md
+  Image Credits: https://unsplash.com/
+  ```
 
-```md
----
-title: Second Post
-excerpt: Second Post
-date: 2020-01-14T21:53:14.578Z
-remoteImages: 
-  - https://images.unsplash.com/photo-1525013066836-c6090f0ad9d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80
-  - https://images.unsplash.com/photo-1546489545-697049cfdc1e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2872&q=80
----
+  > gridsome.config.js
 
-Image Credits: https://unsplash.com/
-```
-
-## GraphQL Query
-
-```graphql
-{
-  allEntry {
-    edges {
-      node {
-        title
-        imageDownloaded
-        imagesDownloaded {
-          image
+  ```js
+  module.exports = {
+    siteName: 'Gridsome',
+    plugins: [{
+        use: '@gridsome/source-filesystem',
+        options: {
+          typeName: 'Entry',
+          path: './content/entries/*.md'
+        }
+      },
+      {
+        use: '@noxify/gridsome-plugin-remote-image',
+        options: {
+          typeName: 'Entry',
+          sourceField: 'remoteImage',
+          targetField: 'downloadedImage',
+          targetPath: './src/assets/downloadedImages'
         }
       }
-    }
+    ]
   }
-}
+  ```
 
-```
+</details>
 
-## GraphQL Result
+## Example 2 - Multiple images
 
-```json
-{
-  "data": {
-    "allEntry": {
-      "edges": [
-        {
-          "node": {
-            "title": "Second Post",
-            "imageDownloaded": {
-              "type": "image",
-              "mimeType": "image/jpeg",
-              //... and all other image properties
-            },
-            "imagesDownloaded": null
-          }
-        },
-        {
-          "node": {
-            "title": "First Post",
-            "imageDownloaded": null,
-            "imagesDownloaded": [
-              {
-                "image": {
-                  "type": "image",
-                  "mimeType": "image/jpeg",
-                  //... and all other image properties
-                }
-              },
-              {
-                "image": {
-                  "type": "image",
-                  "mimeType": "image/jpeg",
-                  //... and all other image properties
-                }
-              }
-            ]
-          }
+<details>
+  <summary>Click here to see the example code</summary>
+  
+  > /content/entries/entry1.md
+
+  ```md
+  ---
+  title: First Post
+  remoteImages:
+    - https://images.unsplash.com/photo-1525013066836-c6090f0ad9d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80
+    - https://images.unsplash.com/photo-1546489545-697049cfdc1e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2872&q=80
+  ---
+
+  Image Credits: https://unsplash.com/
+  ```
+
+  > gridsome.config.js
+
+  ```js
+  module.exports = {
+    siteName: 'Gridsome',
+    plugins: [{
+        use: '@gridsome/source-filesystem',
+        options: {
+          typeName: 'Entry',
+          path: './content/entries/*.md'
         }
-      ]
-    }
+      },
+      {
+        use: '@noxify/gridsome-plugin-remote-image',
+        options: {
+          typeName: 'Entry',
+          sourceField: 'remoteImages',
+          targetField: 'downloadedImage',
+          targetPath: './src/assets/downloadedImages'
+        }
+      }
+    ]
   }
-}
-```
+  ```
+
+</details>
+
+## Example 3 - Nested source field
+
+> **Limitation:** The plugin does not support `Array of objects`, yet. (Check `notSupported` in the example below)
+> Please ensure, that you have use only `Strings`, `Arrays` or `Objects` in your yaml.
+> If you're using `Array object` in your YAML definition, the plugin will not download the remote image(s).
+
+
+<details>
+  <summary>Click here to see the example code</summary>
+  
+  > /content/entries/entry1.md
+
+  ```md
+  ---
+  title: First Post
+  nested:
+    with:
+      stringValue: https://images.unsplash.com/photo-1525013066836-c6090f0ad9d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80
+      arrayValue:
+        - https://images.unsplash.com/photo-1525013066836-c6090f0ad9d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80
+        - https://images.unsplash.com/photo-1546489545-697049cfdc1e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2872&q=80
+  notSupported:
+    - sub:
+        child: https://images.unsplash.com/photo-1525013066836-c6090f0ad9d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80
+    - sub:
+      child: https://images.unsplash.com/photo-1546489545-697049cfdc1e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2872&q=80
+  ---
+
+  Image Credits: https://unsplash.com/
+  ```
+
+  > gridsome.config.js
+
+  ```js
+  module.exports = {
+    siteName: 'Gridsome',
+    plugins: [{
+        use: '@gridsome/source-filesystem',
+        options: {
+          typeName: 'Entry',
+          path: './content/entries/*.md'
+        }
+      },
+      {
+        use: '@noxify/gridsome-plugin-remote-image',
+        options: {
+          typeName: 'Entry',
+          sourceField: 'nested.with.stringValue',
+          targetField: 'downloadedNestedStringValue',
+          targetPath: './src/assets/downloadedImages'
+        }
+      },
+      {
+        use: '@noxify/gridsome-plugin-remote-image',
+        options: {
+          typeName: 'Entry',
+          sourceField: 'nested.with.arrayValue',
+          targetField: 'downloadedNestedArrayValue',
+          targetPath: './src/assets/downloadedImages'
+        }
+      }
+    ]
+  }
+  ```
+
+</details>

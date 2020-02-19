@@ -29,8 +29,8 @@ class ImageDownloader {
         
             //check and ensure that at least one node contains
             //the defined source field - if not, we don't have to continue
-            const fieldType = this.getFieldType(actions);
-            
+            const fieldType = this.getFieldType(actions);    
+                        
             if( !fieldType ) {
                 console.log();
                 console.log(`${chalk.yellowBright('Remote images are not downloaded.')}`)
@@ -73,7 +73,9 @@ class ImageDownloader {
 
         var that = this;
         collection.data().forEach(async function (node) {
-            if (node[that.options.sourceField]) {
+            
+            if ( _.get(node, that.options.sourceField) !== undefined ) {
+
                 const imagePaths = await that.getRemoteImage(node, fieldType);
                 if( fieldType == 'string' ) {
                     node[that.options.targetField] = imagePaths[0];
@@ -96,11 +98,11 @@ class ImageDownloader {
 
         var that = this;
 
-        const sourceField = this.options.sourceField;
-        const imageSources = (fieldType == 'string') ? [node[sourceField]] : node[sourceField];
-        
+        const imageSources = (fieldType == 'string') ? [_.get(node, this.options.sourceField)] : _.get(node, this.options.sourceField);        
+
         let imagePaths = await Promise.all(
             _.map(imageSources, async (imageSource) => {
+                
                 return await imageDownload(imageSource).then(buffer => {
 
                     const hash = crypto.createHash('sha256');
@@ -127,6 +129,8 @@ class ImageDownloader {
 
         const nodeCollection = actions.getCollection(this.options.typeName);
 
+        
+
         let findQuery = {};
         
         //details about this definition can be found here
@@ -134,10 +138,10 @@ class ImageDownloader {
         findQuery[this.options.sourceField] = {
             '$exists': true
         };
-
-        const node = nodeCollection.findNode(findQuery);
-
-        return (node) ? typeof node[this.options.sourceField] : false;
+        
+        const node = nodeCollection.findNodes(findQuery);
+    
+        return (node[0]) ? typeof _.get(node[0], this.options.sourceField) : false;
     }
 
     validateOptions(options={}) {
@@ -150,7 +154,14 @@ class ImageDownloader {
         const constraints = {
             typeName: contraintOption,
             sourceField: contraintOption,
-            targetField: contraintOption,
+            targetField: {
+                format: {
+                    pattern: "[a-zA-Z0-9_-]+",
+                    flags: "i",
+                    message: "can only contain a-z, A-Z, 0-9, _ and -"
+                },
+                ...contraintOption
+            },
             targetPath: contraintOption
         };
 
