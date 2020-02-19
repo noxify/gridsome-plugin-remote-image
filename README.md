@@ -13,7 +13,11 @@ The plugin should work with any data source, but I have tested it only with `sou
 ## Install
 
 ```sh
-npm install -s https://github.com/noxify/gridsome-plugin-image-download.git
+npm install -s https://github.com/noxify/gridsome-plugin-remote-image.git
+
+# or
+
+yarn add https://github.com/noxify/gridsome-plugin-remote-image.git
 ```
 
 ## Setup
