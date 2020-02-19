@@ -1,5 +1,5 @@
 {
-  "name": "@noxify/gridsome-plugin-image-download",
+  "name": "@noxify/gridsome-plugin-remote-image",
   "version": "1.0.0",
   "description": "Simple gridsome plugin to download an remote image based on a defined graphql field",
   "main": "gridsome.server.js",
@@ -7,13 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Marcus Reinhardt",
-  "homepage": "https://github.com/noxify/gridome-plugin-image-download",
+  "homepage": "https://github.com/noxify/gridome-plugin-remote-image",
   "repository": {
     "type": "git",
-    "url": "https://github.com/noxify/gridome-plugin-image-download.git"
+    "url": "https://github.com/noxify/gridome-plugin-remote-image.git"
   },
   "bugs": {
-    "url": "https://github.com/noxify/gridome-plugin-image-download/issues"
+    "url": "https://github.com/noxify/gridome-plugin-remote-image/issues"
   },
   "license": "MIT",
   "publishConfig": {
