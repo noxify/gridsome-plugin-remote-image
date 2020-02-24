@@ -30,7 +30,7 @@ module.exports = {
   plugins: [
     //...
     {
-      use: '@noxify/gridsome-plugin-image-download',
+      use: '@noxify/gridsome-plugin-remote-image',
       options: {
         'typeName' : 'Entry',
         'sourceField': 'remoteImage',
@@ -39,7 +39,7 @@ module.exports = {
       }
     },
     {
-      use: '@noxify/gridsome-plugin-image-download',
+      use: '@noxify/gridsome-plugin-remote-image',
       options: {
         'typeName' : 'Entry',
         'sourceField': 'remoteImages',
