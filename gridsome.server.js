@@ -108,6 +108,10 @@ class ImageDownloader {
                     var targetFileName = hash.digest('hex');
                     
                     const type = imageType(buffer);
+                    
+                    if (!fs.existsSync(that.options.targetPath)) {
+                        fs.mkdirSync(that.options.targetPath)
+                    }
 
                     const filePath = path.resolve(
                         that.options.targetPath, 
