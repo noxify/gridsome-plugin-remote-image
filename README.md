@@ -13,11 +13,11 @@ The plugin should work with any data source, but I have tested it only with `sou
 ## Install
 
 ```sh
-npm install -s https://github.com/noxify/gridsome-plugin-remote-image.git
+npm i @noxify/gridsome-plugin-remote-image
 
 # or
 
-yarn add https://github.com/noxify/gridsome-plugin-remote-image.git
+yarn add @noxify/gridsome-plugin-remote-image
 ```
 
 ## Setup
@@ -54,14 +54,14 @@ module.exports = {
 
 ## Configuration options
 
-* `typeName` 
+* `typeName`
 Defines the collection where the script should update the nodes
 
-* `sourceField` 
+* `sourceField`
 Defines the graphql field which contains the remote image url
 
-* `targetField` 
-Defines the field name which will be generated. 
+* `targetField`
+Defines the field name which will be generated.
 The field is from Type `Image` or `[Images]` in case the source field is not a string.
 
 * `targetPath`
@@ -71,7 +71,7 @@ If you set `./src/assets/remoteImages`, it will save the images to `<projectroot
 > **You have to ensure, that the defined path is valid and the directory exists.**
 > It's currently not possible to use `~` or `@`.
 
-# Example 
+# Example
 
 ## Markdown Files
 
@@ -93,7 +93,7 @@ Image Credits: https://unsplash.com/
 title: Second Post
 excerpt: Second Post
 date: 2020-01-14T21:53:14.578Z
-remoteImages: 
+remoteImages:
   - https://images.unsplash.com/photo-1525013066836-c6090f0ad9d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80
   - https://images.unsplash.com/photo-1546489545-697049cfdc1e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2872&q=80
 ---
