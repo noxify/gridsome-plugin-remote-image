@@ -6,7 +6,8 @@ const imageDownload = require('image-download')
 const imageType = require('image-type')
 const normalizeUrl = require('normalize-url')
 const path = require('path')
-const validate = require('validate.js')
+const validate = require( 'validate.js' )
+const url = require('url')
 
 class ImageDownloader {
     constructor(api, options) {
@@ -135,14 +136,17 @@ class ImageDownloader {
         const imageSources = (fieldType === 'string') ? [get(node, sourceField)] : get(node, sourceField);
 
         return Promise.all(
-            imageSources.map(imageSource => {
-                imageSource = normalizeUrl(imageSource, { 'forceHttps': true })
+            imageSources.map( imageSource => {
+                imageSource = normalizeUrl('http://lorempixel.com/400/200/sports/1/', { 'forceHttps': true })
+                const { pathname } = new URL(imageSource)
+
+                const targetFileName = options.originalFilePath ? pathname : crypto.createHash('sha256').update(imageSource).digest('hex');
 
                 return imageDownload(imageSource).then(buffer => {
                     const type = imageType(buffer);
 
-                    const targetFileName = crypto.createHash('sha256').update(imageSource).digest('hex');
-                    const filePath = path.join(process.cwd(), options.targetPath, `${targetFileName}.${type.ext}`)
+
+                    const filePath = path.join(process.cwd(), options.targetPath, options.originalFilePath ? targetFileName : `${targetFileName}.${type.ext}`)
 
                     if (fs.existsSync(filePath)) return filePath
 
