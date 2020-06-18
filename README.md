@@ -32,6 +32,7 @@ module.exports = {
     {
       use: '@noxify/gridsome-plugin-remote-image',
       options: {
+        'original': true,
         'typeName' : 'Entry',
         'sourceField': 'remoteImage',
         'targetField': 'imageDownloaded',
@@ -41,6 +42,7 @@ module.exports = {
     {
       use: '@noxify/gridsome-plugin-remote-image',
       options: {
+        'cache': false,
         'typeName' : 'Entry',
         'sourceField': 'remoteImages',
         'targetField': 'imagesDownloaded',
@@ -70,6 +72,16 @@ If you set `./src/assets/remoteImages`, it will save the images to `<projectroot
 
 > **You have to ensure, that the defined path is valid and the directory exists.**
 > It's currently not possible to use `~` or `@`.
+
+### Optional configurations
+
+* `cache`
+Defines whether images will be cached - defaults to `true`.
+Setting this to false will force re-download of all images.
+
+* `original`
+Defines whether to use the original image path as the file path - defaults to false.
+Setting this to true will save images in a folder structure the same as the image URL - `https://example.com/some/image/path.jpg` will be saved as `/<target path>/some/image/path.jpg`
 
 # Example
 
