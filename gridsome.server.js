@@ -86,7 +86,7 @@ class ImageDownloader {
             }
         }
 
-        const node = nodeCollection.findNode(findQuery);
+        const node = nodeCollection.findNode( findQuery );
 
         //we're using the lodash get functionality
         //to allow a dot notation in the source field name
@@ -97,13 +97,11 @@ class ImageDownloader {
 
         const schemaType = (fieldType === 'string') ? 'Image' : '[Images]';
 
-        addSchemaTypes(
-            `
-                type Images  {
-                    image: Image
-                }
-            `
-        );
+        addSchemaTypes(`
+            type Images  {
+                image: Image
+            }
+        `);
 
         //extend the existing schema
         addSchemaTypes(`
