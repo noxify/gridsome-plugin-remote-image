@@ -148,31 +148,31 @@ class ImageDownloader {
                 // Parse the path to get the existing name, dir, and ext
                 let { name, dir, ext } = path.parse(pathname)
 
-                // Try to get ext from the pathname, if there is none, we will try to guess from the http content-type
+                // If there is no ext, we will try to guess from the http content-type
                 if (!ext) {
                     const { headers } = await got.head(imageSource)
                     ext = `.${mime.getExtension(headers['content-type'])}`
                 }
 
-                // Build the target file name - if we want origin names, return that, otherwise return a hash of the image source
+                // Build the target file name - if we want the original name then return that, otherwise return a hash of the image source
                 const targetFileName = original ? name : crypto.createHash('sha256').update(imageSource).digest('hex')
-                // Build the target folder path - joining the current dir, target dir, and option original path
+                // Build the target folder path - joining the current dir, target dir, and optional original path
                 const targetFolder = path.join(process.cwd(), targetPath, original ? dir : '')
                 // Build the file path including ext & dir
-                const filePath = path.format({ name: targetFileName, ext, dir: targetFolder })
+                const filePath = path.format({ ext, name: targetFileName, dir: targetFolder })
 
-                // Check if file exists, if so we can skp downloading (unless cache = false)
+                // If cache = true, and file exists, we can skp downloading
                 if (cache && await fs.exists(filePath)) return filePath
 
                 // Otherwise, make sure the file exists, and start downloading with a stream
                 await fs.ensureFile(filePath)
-                // This streams the download directly to disk, saving us storeing every single image in memory
+                // This streams the download directly to disk, saving Node temporarily storing every single image in memory
                 await pipeline(
                     got.stream(imageSource),
                     fs.createWriteStream(filePath)
                 )
 
-                // Return the complete filepath for further use
+                // Return the complete file path for further use
                 return filePath
             })
         )
