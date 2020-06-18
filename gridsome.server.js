@@ -136,7 +136,7 @@ class ImageDownloader {
 
     async getRemoteImage ( node, fieldType, options ) {
         // Set some defaults
-        const { cache = true, originalFilePath = false, targetPath = 'src/assets/remoteImages', sourceField } = options
+        const { cache = true, original = false, targetPath = 'src/assets/remoteImages', sourceField } = options
 
         const imageSources = (fieldType === 'string') ? [get(node, sourceField)] : get(node, sourceField);
 
@@ -155,9 +155,9 @@ class ImageDownloader {
                 }
 
                 // Build the target file name - if we want origin names, return that, otherwise return a hash of the image source
-                const targetFileName = originalFilePath ? name : crypto.createHash('sha256').update(imageSource).digest('hex')
+                const targetFileName = original ? name : crypto.createHash('sha256').update(imageSource).digest('hex')
                 // Build the target folder path - joining the current dir, target dir, and option original path
-                const targetFolder = path.join(process.cwd(), targetPath, originalFilePath ? dir : '')
+                const targetFolder = path.join(process.cwd(), targetPath, original ? dir : '')
                 // Build the file path including ext & dir
                 const filePath = path.format({ name: targetFileName, ext, dir: targetFolder })
 
