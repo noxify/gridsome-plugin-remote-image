@@ -98,7 +98,7 @@ class ImageDownloader {
         const schemaType = (fieldType === 'string') ? 'Image' : '[Images]';
 
         addSchemaTypes(`
-            type Images  {
+            type Images {
                 image: Image
             }
         `);
