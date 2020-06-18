@@ -143,7 +143,7 @@ class ImageDownloader {
         return Promise.all(
             imageSources.map( async imageSource => {
                 // Normalize URL, and extract the pathname, to be used for the original filename if required
-                imageSource = normalizeUrl('http://lorempixel.com/400/200/sports/1/', { 'forceHttps': true })
+                imageSource = normalizeUrl(imageSource, { 'forceHttps': true })
                 const { pathname } = new URL(imageSource)
                 // Parse the path to get the existing name, dir, and ext
                 let { name, dir, ext } = path.parse(pathname)
