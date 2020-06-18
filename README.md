@@ -54,7 +54,7 @@ module.exports = {
 }
 ```
 
-## Configuration options
+## Documentation
 
 * `typeName`
 Defines the collection where the script should update the nodes
