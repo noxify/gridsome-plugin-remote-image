@@ -142,7 +142,7 @@ class ImageDownloader {
                     const type = imageType(buffer);
 
                     const targetFileName = crypto.createHash('sha256').update(imageSource).digest('hex');
-                    const filePath = path.join(options.targetPath, `${targetFileName}.${type.ext}`)
+                    const filePath = path.join(process.cwd(), options.targetPath, `${targetFileName}.${type.ext}`)
 
                     if (fs.existsSync(filePath)) return filePath
 
