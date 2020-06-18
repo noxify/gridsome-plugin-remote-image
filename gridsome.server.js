@@ -2,12 +2,16 @@ const chalk = require('chalk')
 const crypto = require('crypto')
 const fs = require('fs-extra')
 const get = require('lodash.get')
-const imageDownload = require('image-download')
-const imageType = require('image-type')
+const got = require('got').default
+const mime = require('mime/lite')
 const normalizeUrl = require('normalize-url')
 const path = require('path')
-const validate = require( 'validate.js' )
+const stream = require('stream')
 const url = require('url')
+const validate = require( 'validate.js' )
+const { promisify } = require('util')
+
+const pipeline = promisify(stream.pipeline)
 
 class ImageDownloader {
     constructor(api, options) {
@@ -130,29 +134,46 @@ class ImageDownloader {
         })
     }
 
-    async getRemoteImage(node, fieldType, options) {
+    async getRemoteImage ( node, fieldType, options ) {
+        // Set some defaults
+        const { cache = true, originalFilePath = false, targetPath = 'src/assets/remoteImages', sourceField } = options
 
-        const sourceField = options.sourceField;
         const imageSources = (fieldType === 'string') ? [get(node, sourceField)] : get(node, sourceField);
 
         return Promise.all(
-            imageSources.map( imageSource => {
+            imageSources.map( async imageSource => {
+                // Normalize URL, and extract the pathname, to be used for the original filename if required
                 imageSource = normalizeUrl('http://lorempixel.com/400/200/sports/1/', { 'forceHttps': true })
                 const { pathname } = new URL(imageSource)
+                // Parse the path to get the existing name, dir, and ext
+                let { name, dir, ext } = path.parse(pathname)
 
-                const targetFileName = options.originalFilePath ? pathname : crypto.createHash('sha256').update(imageSource).digest('hex');
+                // Try to get ext from the pathname, if there is none, we will try to guess from the http content-type
+                if (!ext) {
+                    const { headers } = await got.head(imageSource)
+                    ext = `.${mime.getExtension(headers['content-type'])}`
+                }
 
-                return imageDownload(imageSource).then(buffer => {
-                    const type = imageType(buffer);
+                // Build the target file name - if we want origin names, return that, otherwise return a hash of the image source
+                const targetFileName = originalFilePath ? name : crypto.createHash('sha256').update(imageSource).digest('hex')
+                // Build the target folder path - joining the current dir, target dir, and option original path
+                const targetFolder = path.join(process.cwd(), targetPath, originalFilePath ? dir : '')
+                // Build the file path including ext & dir
+                const filePath = path.format({ name: targetFileName, ext, dir: targetFolder })
 
+                // Check if file exists, if so we can skp downloading (unless cache = false)
+                if (cache && await fs.exists(filePath)) return filePath
 
-                    const filePath = path.join(process.cwd(), options.targetPath, options.originalFilePath ? targetFileName : `${targetFileName}.${type.ext}`)
+                // Otherwise, make sure the file exists, and start downloading with a stream
+                await fs.ensureFile(filePath)
+                // This streams the download directly to disk, saving us storeing every single image in memory
+                await pipeline(
+                    got.stream(imageSource),
+                    fs.createWriteStream(filePath)
+                )
 
-                    if (fs.existsSync(filePath)) return filePath
-
-                    fs.outputFileSync(filePath, buffer, (err) => console.log(err ? err : ''))
-                    return filePath
-                });
+                // Return the complete filepath for further use
+                return filePath
             })
         )
     }
