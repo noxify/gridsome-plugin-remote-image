@@ -39,7 +39,7 @@ class ImageDownloader {
             this.generateSchemaType(addSchemaTypes, fieldType);
         });
 
-        //run the plugin code, after gridsome finished all their work ( right? )
+        //run the plugin code, after gridsome finished all their work ( right? - right! ;) )
         api.onBootstrap(() => this.loadImages())
     }
 
@@ -80,9 +80,11 @@ class ImageDownloader {
 
         //details about this definition can be found here
         //https://github.com/techfort/LokiJS/wiki/Query-Examples#find-operator-examples-
-        const findQuery[options.sourceField] = {
-            '$exists': true
-        };
+        const findQuery = {
+            [options.sourceField]: {
+                '$exists': true
+            }
+        }
 
         const node = nodeCollection.findNode(findQuery);
 
