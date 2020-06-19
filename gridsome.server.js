@@ -1,13 +1,12 @@
-const fs = require('fs')
-const path = require('path')
-const crypto = require('crypto')
-const imageType = require('image-type')
-const imageDownload = require('image-download')
-const validate = require('validate.js')
 const chalk = require('chalk')
-const _ = require('lodash')
+const crypto = require('crypto')
+const fs = require('fs-extra')
+const get = require('lodash.get')
+const imageDownload = require('image-download')
+const imageType = require('image-type')
 const normalizeUrl = require('normalize-url')
-
+const path = require('path')
+const validate = require('validate.js')
 
 class ImageDownloader {
     constructor(api, options) {
@@ -15,7 +14,7 @@ class ImageDownloader {
         //no one is perfect, so we check that all required
         //config values are defined in `gridsome.config.js`
         const validationResult = this.validateOptions(options);
-        if( validationResult ) {
+        if (validationResult) {
             console.log();
             console.log(`${chalk.yellowBright('Remote images are not downloaded. Please check your configuration.')}`)
             console.log(`${chalk.yellowBright('* '+validationResult.join('\n* '))}`)
@@ -27,7 +26,7 @@ class ImageDownloader {
         this.options = options;
         this.api = api;
 
-        //initialize the `loadImage` event and make 
+        //initialize the `loadImage` event and make
         //it available before we run the `onBootstrap` command
         this.initializeEvent(api);
 
@@ -40,7 +39,7 @@ class ImageDownloader {
             this.generateSchemaType(addSchemaTypes, fieldType);
         });
 
-        //run the plugin code, after gridsome finished all their work ( right? )
+        //run the plugin code, after gridsome finished all their work ( right? - right! ;) )
         api.onBootstrap(() => this.loadImages())
     }
 
@@ -56,7 +55,7 @@ class ImageDownloader {
      * Run the defined event with the required
      * arguments - i have no clue why `this` is not available
      * but I'm too tired to check this in detail...
-     * Defining the needed methods is fine for me :) 
+     * Defining the needed methods is fine for me :)
      */
     async loadImages() {
         await this.run('loadImage', null, {
@@ -77,67 +76,55 @@ class ImageDownloader {
     }
 
     getFieldType(api, options) {
-        
         const nodeCollection = api._app.store.getCollection(options.typeName);
-
-        let findQuery = {};
 
         //details about this definition can be found here
         //https://github.com/techfort/LokiJS/wiki/Query-Examples#find-operator-examples-
-        findQuery[options.sourceField] = {
-            '$exists': true
-        };
+        const findQuery = {
+            [options.sourceField]: {
+                '$exists': true
+            }
+        }
 
-        const node = nodeCollection.findNode(findQuery);
+        const node = nodeCollection.findNode( findQuery );
 
         //we're using the lodash get functionality
         //to allow a dot notation in the source field name
-        return (node) ? typeof _.get(node, options.sourceField) : false;
+        return (node) ? typeof get(node, options.sourceField) : false;
     }
 
     generateSchemaType(addSchemaTypes, fieldType) {
-        
-        const schemaType = (fieldType == 'string') ? 'Image' : '[Images]';
-        
-        addSchemaTypes(
-            `
-                type Images  {
-                    image: Image
-                }
-            `
-        );
+
+        const schemaType = (fieldType === 'string') ? 'Image' : '[Images]';
+
+        addSchemaTypes(`
+            type Images {
+                image: Image
+            }
+        `);
 
         //extend the existing schema
-        addSchemaTypes(
-            `
-                type ${this.options.typeName} implements Node @infer {
-                    ${this.options.targetField}: ${schemaType}
-                }
-            `
-        );  
+        addSchemaTypes(`
+            type ${this.options.typeName} implements Node @infer {
+                ${this.options.targetField}: ${schemaType}
+            }
+        `);
     }
 
     async updateNodes(api, fieldType, plugin) {
-        
-        var collection = api._app.store.getCollection(plugin.options.typeName);
+        const collection = api._app.store.getCollection(plugin.options.typeName);
 
-        collection.data().forEach(async function (node) {
-            
-            if (_.get(node,plugin.options.sourceField)) {
+        collection.data().forEach(async node => {
+            if (get(node,plugin.options.sourceField)) {
                 const imagePaths = await plugin.getRemoteImage(node, fieldType, plugin.options);
 
-                if( fieldType == 'string' ) {
+                if( fieldType === 'string' ) {
                     node[plugin.options.targetField] = imagePaths[0];
                 } else {
-                   
-                    node[plugin.options.targetField] = _.map(imagePaths, function(imagePath) {
-                        return {
-                            image: imagePath
-                        };
-                    });   
+                    node[plugin.options.targetField] = imagePaths.map(image => ({ image }));
                 }
 
-                var res = collection.updateNode(node);
+                collection.updateNode(node)
             }
         })
     }
@@ -145,41 +132,25 @@ class ImageDownloader {
     async getRemoteImage(node, fieldType, options) {
 
         const sourceField = options.sourceField;
-        const imageSources = (fieldType == 'string') ? [_.get(node,sourceField)] : _.get(node,sourceField);
-        
-        let imagePaths = await Promise.all(
-            _.map(imageSources, async (imageSource) => {
+        const imageSources = (fieldType === 'string') ? [get(node, sourceField)] : get(node, sourceField);
 
-                imageSource = normalizeUrl(imageSource,{'forceHttps' : true})
-                                
-                return await imageDownload(imageSource).then(buffer => {
+        return Promise.all(
+            imageSources.map(imageSource => {
+                imageSource = normalizeUrl(imageSource, { 'forceHttps': true })
 
-                    const hash = crypto.createHash('sha256');
-                    hash.update(imageSource);
-                    var targetFileName = hash.digest('hex');
-                    
+                return imageDownload(imageSource).then(buffer => {
                     const type = imageType(buffer);
 
-                    const filePath = path.resolve(
-                        options.targetPath, 
-                        `${targetFileName}.${type.ext}`
-                    )
+                    const targetFileName = crypto.createHash('sha256').update(imageSource).digest('hex');
+                    const filePath = path.join(process.cwd(), options.targetPath, `${targetFileName}.${type.ext}`)
 
-                    if( fs.existsSync(filePath) ) {
-                        return filePath;
-                    }
-                    
-                    if (!fs.existsSync(options.targetPath)) {
-                        fs.mkdirSync(options.targetPath)
-                    }
+                    if (fs.existsSync(filePath)) return filePath
 
-                    fs.writeFile(filePath, buffer, (err) => console.log(err ? err : ''));
-                    return filePath;
+                    fs.outputFileSync(filePath, buffer, (err) => console.log(err ? err : ''))
+                    return filePath
                 });
             })
-        );
-        
-        return imagePaths;
+        )
     }
 
     /**********************
@@ -225,7 +196,7 @@ class ImageDownloader {
         };
 
         const validationResult = validate(options, constraints, {
-            format: "flat"
+            format: 'flat'
         });
 
         return validationResult;
