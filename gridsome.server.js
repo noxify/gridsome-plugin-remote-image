@@ -161,7 +161,7 @@ class ImageDownloader {
                 // Build the file path including ext & dir
                 const filePath = path.format({ ext, name: targetFileName, dir: targetFolder })
 
-                // If cache = true, and file exists, we can skp downloading
+                // If cache = true, and file exists, we can skip downloading
                 if (cache && await fs.exists(filePath)) return filePath
 
                 // Otherwise, make sure the file exists, and start downloading with a stream
