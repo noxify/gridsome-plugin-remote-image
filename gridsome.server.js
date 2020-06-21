@@ -216,8 +216,7 @@ class ImageDownloader {
         const constraints = {
             typeName: contraintOption,
             sourceField: contraintOption,
-            targetField: contraintOption,
-            targetPath: contraintOption
+            targetField: contraintOption
         };
 
         const validationResult = validate(options, constraints, {
