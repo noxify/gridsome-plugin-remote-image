@@ -148,32 +148,39 @@ class ImageDownloader {
                 // Parse the path to get the existing name, dir, and ext
                 let { name, dir, ext } = path.parse(pathname)
 
-                // If there is no ext, we will try to guess from the http content-type
-                if (!ext) {
-                    const { headers } = await got.head(imageSource)
-                    ext = `.${mime.getExtension(headers['content-type'])}`
+                try {
+                    // If there is no ext, we will try to guess from the http content-type
+                    if (!ext) {
+                        const { headers } = await got.head(imageSource)
+                        ext = `.${mime.getExtension(headers['content-type'])}`
+                    }
+
+                    // Build the target file name - if we want the original name then return that, otherwise return a hash of the image source
+                    const targetFileName = original ? name : crypto.createHash('sha256').update(imageSource).digest('hex')
+                    // Build the target folder path - joining the current dir, target dir, and optional original path
+                    const targetFolder = path.join(process.cwd(), targetPath, original ? dir : '')
+                    // Build the file path including ext & dir
+                    const filePath = path.format({ ext, name: targetFileName, dir: targetFolder })
+
+                    // If cache = true, and file exists, we can skip downloading
+                    if (cache && await fs.exists(filePath)) return filePath
+
+                    // Otherwise, make sure the file exists, and start downloading with a stream
+                    await fs.ensureFile(filePath)
+                    // This streams the download directly to disk, saving Node temporarily storing every single image in memory
+                    await pipeline(
+                        got.stream(imageSource),
+                        fs.createWriteStream(filePath)
+                    )
+
+                    // Return the complete file path for further use
+                    return filePath
+                } catch(e) {
+                    console.log('')
+                    console.log(`${chalk.yellowBright(`Unable to download image for ${options.typeName} - Source URL: ${imageSource}`)}`)
+                    console.log(`${chalk.redBright(e)}`)
+                    return null;
                 }
-
-                // Build the target file name - if we want the original name then return that, otherwise return a hash of the image source
-                const targetFileName = original ? name : crypto.createHash('sha256').update(imageSource).digest('hex')
-                // Build the target folder path - joining the current dir, target dir, and optional original path
-                const targetFolder = path.join(process.cwd(), targetPath, original ? dir : '')
-                // Build the file path including ext & dir
-                const filePath = path.format({ ext, name: targetFileName, dir: targetFolder })
-
-                // If cache = true, and file exists, we can skip downloading
-                if (cache && await fs.exists(filePath)) return filePath
-
-                // Otherwise, make sure the file exists, and start downloading with a stream
-                await fs.ensureFile(filePath)
-                // This streams the download directly to disk, saving Node temporarily storing every single image in memory
-                await pipeline(
-                    got.stream(imageSource),
-                    fs.createWriteStream(filePath)
-                )
-
-                // Return the complete file path for further use
-                return filePath
             })
         )
     }
