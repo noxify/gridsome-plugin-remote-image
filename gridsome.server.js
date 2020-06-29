@@ -19,6 +19,7 @@ class ImageDownloader {
         //no one is perfect, so we check that all required
         //config values are defined in `gridsome.config.js`
         const validationResult = this.validateOptions(options)
+
         if (validationResult) {
             console.log()
             console.log(`${chalk.yellowBright('Remote images are not downloaded. Please check your configuration.')}`)
@@ -44,7 +45,7 @@ class ImageDownloader {
             this.generateSchemaType(addSchemaTypes, fieldType)
         });
 
-        //run the plugin code, after gridsome finished all their work ( right? - right! ;) )
+        //run the plugin code, after gridsome finished all their work
         api.onBootstrap(() => this.loadImages())
     }
 
@@ -142,6 +143,15 @@ class ImageDownloader {
 
         return Promise.all(
             imageSources.map( async imageSource => {
+
+                // Check if we have a local file as source
+                var isLocal = validate({ imageSource: imageSource }, { imageSource: { url: true } })
+
+                // If this is the case, we can stop here and re-using the existing image
+                if( isLocal ) {
+                    return imageSource
+                }
+
                 // Normalize URL, and extract the pathname, to be used for the original filename if required
                 imageSource = normalizeUrl(imageSource, { 'forceHttps': true })
                 const { pathname } = new URL(imageSource)
