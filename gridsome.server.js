@@ -8,7 +8,7 @@ const normalizeUrl = require('normalize-url')
 const path = require('path')
 const stream = require('stream')
 const url = require('url')
-const validate = require( 'validate.js' )
+const validate = require('validate.js')
 const { promisify } = require('util')
 
 const pipeline = promisify(stream.pipeline)
@@ -18,30 +18,30 @@ class ImageDownloader {
 
         //no one is perfect, so we check that all required
         //config values are defined in `gridsome.config.js`
-        const validationResult = this.validateOptions(options);
+        const validationResult = this.validateOptions(options)
         if (validationResult) {
-            console.log();
+            console.log()
             console.log(`${chalk.yellowBright('Remote images are not downloaded. Please check your configuration.')}`)
             console.log(`${chalk.yellowBright('* '+validationResult.join('\n* '))}`)
-            console.log();
+            console.log()
 
-            return null;
+            return null
         }
 
-        this.options = options;
-        this.api = api;
+        this.options = options
+        this.api = api
 
         //initialize the `loadImage` event and make
         //it available before we run the `onBootstrap` command
-        this.initializeEvent(api);
+        this.initializeEvent(api)
 
         //create a new type `Images` which is required
         //for array support
         //also add a new field to the defined collection
         //to store the downloaded images
         api.createSchema(({ addSchemaTypes }) => {
-            const fieldType = this.getFieldType(api, options);
-            this.generateSchemaType(addSchemaTypes, fieldType);
+            const fieldType = this.getFieldType(api, options)
+            this.generateSchemaType(addSchemaTypes, fieldType)
         });
 
         //run the plugin code, after gridsome finished all their work ( right? - right! ;) )
@@ -76,12 +76,12 @@ class ImageDownloader {
      * Called via `loadImages`
      */
     async runDownloader(plugin, api) {
-        const fieldType = plugin.getFieldType(api, plugin.options);
+        const fieldType = plugin.getFieldType(api, plugin.options)
         await plugin.updateNodes(api, fieldType, plugin)
     }
 
     getFieldType(api, options) {
-        const nodeCollection = api._app.store.getCollection(options.typeName);
+        const nodeCollection = api._app.store.getCollection(options.typeName)
 
         //details about this definition can be found here
         //https://github.com/techfort/LokiJS/wiki/Query-Examples#find-operator-examples-
@@ -91,42 +91,42 @@ class ImageDownloader {
             }
         }
 
-        const node = nodeCollection.findNode( findQuery );
+        const node = nodeCollection.findNode( findQuery )
 
         //we're using the lodash get functionality
         //to allow a dot notation in the source field name
-        return (node) ? typeof get(node, options.sourceField) : false;
+        return (node) ? typeof get(node, options.sourceField) : false
     }
 
     generateSchemaType(addSchemaTypes, fieldType) {
 
-        const schemaType = (fieldType === 'string') ? 'Image' : '[Images]';
+        const schemaType = (fieldType === 'string') ? 'Image' : '[Images]'
 
         addSchemaTypes(`
             type Images {
                 image: Image
             }
-        `);
+        `)
 
         //extend the existing schema
         addSchemaTypes(`
             type ${this.options.typeName} implements Node @infer {
                 ${this.options.targetField}: ${schemaType}
             }
-        `);
+        `)
     }
 
     async updateNodes(api, fieldType, plugin) {
-        const collection = api._app.store.getCollection(plugin.options.typeName);
+        const collection = api._app.store.getCollection(plugin.options.typeName)
 
         collection.data().forEach(async node => {
             if (get(node,plugin.options.sourceField)) {
-                const imagePaths = await plugin.getRemoteImage(node, fieldType, plugin.options);
+                const imagePaths = await plugin.getRemoteImage(node, fieldType, plugin.options)
 
                 if( fieldType === 'string' ) {
-                    node[plugin.options.targetField] = imagePaths[0];
+                    node[plugin.options.targetField] = imagePaths[0]
                 } else {
-                    node[plugin.options.targetField] = imagePaths.map(image => ({ image }));
+                    node[plugin.options.targetField] = imagePaths.map(image => ({ image }))
                 }
 
                 collection.updateNode(node)
@@ -138,7 +138,7 @@ class ImageDownloader {
         // Set some defaults
         const { cache = true, original = false, targetPath = 'src/assets/remoteImages', sourceField } = options
 
-        const imageSources = (fieldType === 'string') ? [get(node, sourceField)] : get(node, sourceField);
+        const imageSources = (fieldType === 'string') ? [get(node, sourceField)] : get(node, sourceField)
 
         return Promise.all(
             imageSources.map( async imageSource => {
@@ -179,7 +179,7 @@ class ImageDownloader {
                     console.log('')
                     console.log(`${chalk.yellowBright(`Unable to download image for ${options.typeName} - Source URL: ${imageSource}`)}`)
                     console.log(`${chalk.redBright(e)}`)
-                    return null;
+                    return null
                 }
             })
         )
@@ -228,9 +228,9 @@ class ImageDownloader {
 
         const validationResult = validate(options, constraints, {
             format: 'flat'
-        });
+        })
 
-        return validationResult;
+        return validationResult
     }
 }
 
