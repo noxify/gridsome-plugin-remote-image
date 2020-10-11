@@ -1,6 +1,6 @@
 {
   "name": "@noxify/gridsome-plugin-remote-image",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Simple gridsome plugin to download an remote image based on a defined graphql field",
   "main": "gridsome.server.js",
   "scripts": {
