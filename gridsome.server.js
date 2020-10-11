@@ -137,7 +137,7 @@ class ImageDownloader {
 
     async getRemoteImage ( node, fieldType, options ) {
         // Set some defaults
-        const { cache = true, original = false, targetPath = 'src/assets/remoteImages', sourceField } = options
+        const { cache = true, original = false, forceHttps = true, downloadFromLocalNetwork = false, targetPath = 'src/assets/remoteImages', sourceField } = options
 
         const imageSources = (fieldType === 'string') ? [get(node, sourceField)] : get(node, sourceField)
 
@@ -145,7 +145,7 @@ class ImageDownloader {
             imageSources.map( async imageSource => {
 
                 // Check if we have a local file as source
-                var isLocal = validate({ imageSource: imageSource }, { imageSource: { url: true } })
+                var isLocal = validate({ imageSource: imageSource }, { imageSource: { url: { allowLocal: downloadFromLocalNetwork } } })
 
                 // If this is the case, we can stop here and re-using the existing image
                 if( isLocal ) {
@@ -153,7 +153,7 @@ class ImageDownloader {
                 }
 
                 // Normalize URL, and extract the pathname, to be used for the original filename if required
-                imageSource = normalizeUrl(imageSource, { 'forceHttps': true })
+                imageSource = normalizeUrl(imageSource, { 'forceHttps': forceHttps })
                 const { pathname } = new URL(imageSource)
                 // Parse the path to get the existing name, dir, and ext
                 let { name, dir, ext } = path.parse(pathname)
