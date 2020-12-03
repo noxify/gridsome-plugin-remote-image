@@ -101,7 +101,11 @@ class ImageDownloader {
 
     generateSchemaType(addSchemaTypes, fieldType) {
 
-        const schemaType = (fieldType === 'string') ? 'Image' : '[Images]'
+        const schemaType =
+        fieldType === 'string' ||
+        !!(this.options.schemaType && this.options.schemaType === 'Image')
+            ? 'Image'
+            : '[Images]'
 
         addSchemaTypes(`
             type Images {
