@@ -125,7 +125,7 @@ class ImageDownloader {
         const collection = api._app.store.getCollection(plugin.options.typeName)
 
 
-        collection.data().reduce(async (prev, node) => {
+        await collection.data().reduce(async (prev, node) => {
             await prev
             if (get(node,plugin.options.sourceField)) {
                 const imagePaths = await plugin.getRemoteImage(node, fieldType, plugin.options)
