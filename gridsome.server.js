@@ -167,7 +167,6 @@ class ImageDownloader {
                     return imageSource
                 }
 
-                console.log(imageSource)
                 // Check if we have a local file as source
                 var isLocal = validate({ imageSource: imageSource }, { imageSource: { url: { allowLocal: downloadFromLocalNetwork } } })
 
