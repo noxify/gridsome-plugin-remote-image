@@ -7,13 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Marcus Reinhardt",
-  "homepage": "https://github.com/noxify/gridome-plugin-remote-image",
+  "homepage": "https://github.com/noxify/gridsome-plugin-remote-image",
   "repository": {
     "type": "git",
-    "url": "https://github.com/noxify/gridome-plugin-remote-image.git"
+    "url": "https://github.com/noxify/gridsome-plugin-remote-image.git"
   },
   "bugs": {
-    "url": "https://github.com/noxify/gridome-plugin-remote-image/issues"
+    "url": "https://github.com/noxify/gridsome-plugin-remote-image/issues"
   },
   "license": "MIT",
   "publishConfig": {
