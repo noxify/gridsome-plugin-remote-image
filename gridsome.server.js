@@ -149,7 +149,8 @@ class ImageDownloader {
             original = false, 
             forceHttps = false, 
             normalizeProtocol = true, 
-            defaultProtocol = 'http:', 
+            defaultProtocol = 'http:',
+            urlPrefix = '', 
             downloadFromLocalNetwork = false, 
             targetPath = 'src/assets/remoteImages', 
             sourceField 
@@ -159,6 +160,11 @@ class ImageDownloader {
 
         return Promise.all(
             imageSources.map( async imageSource => {
+
+                // If a URL prefix is provided, add it
+                if ( urlPrefix ) {
+                    imageSource = urlPrefix.concat(imageSource);
+                }
 
                 try {
                 // Normalize URL, and extract the pathname, to be used for the original filename if required
